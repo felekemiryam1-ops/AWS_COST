@@ -1,0 +1,5 @@
+{
+    "instance": "t3.micro",
+    "hours": 730,
+    "servers": 3
+}

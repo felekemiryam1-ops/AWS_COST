@@ -1,4 +1,4 @@
-import json
+import sys
 
 from cost_tools import calculate_total_cost, calculate_daily_estimate
 
@@ -12,14 +12,25 @@ prices = {
 
 def main():
 
-    with open("config.json") as file:
-        config = json.load(file)
+    # Check that the user provided 3 arguments
+    if len(sys.argv) != 4:
+        print("Usage: python aws_cost.py <instance> <hours> <servers>")
+        sys.exit()
 
-    instance = config["instance"]
-    hours = config["hours"]
-    servers = config["servers"]
+    instance = sys.argv[1]
 
-    hourly_price = prices[instance]
+    try:
+        hours = int(sys.argv[2])
+        servers = int(sys.argv[3])
+    except ValueError:
+        print("Hours and servers must be numbers.")
+        sys.exit()
+
+    try:
+        hourly_price = prices[instance]
+    except KeyError:
+        print("Unknown instance type.")
+        sys.exit()
 
     total_cost = calculate_total_cost(
         hourly_price,
@@ -29,7 +40,10 @@ def main():
 
     daily_estimate = calculate_daily_estimate(total_cost)
 
+    print("\nAWS COST ESTIMATE")
+    print("-----------------")
     print(f"Instance: {instance}")
+    print(f"Hourly price: ${hourly_price:.4f}")
     print(f"Hours: {hours}")
     print(f"Servers: {servers}")
     print(f"Monthly estimate: ${total_cost:.2f}")
