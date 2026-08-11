@@ -1,46 +1,39 @@
-prices = {"t2.micro": 0.0116, "t3.micro": 0.0104, "t3.small": 0.0208}
+import json
+
+from cost_tools import calculate_total_cost, calculate_daily_estimate
+
+
+prices = {
+    "t2.micro": 0.0116,
+    "t3.micro": 0.0104,
+    "t3.small": 0.0208
+}
+
 
 def main():
- calcualte_cost()
-  
 
+    with open("config.json") as file:
+        config = json.load(file)
 
-def calcualte_cost():
- while True:
-  try:
-  
-   instances = input("instance type : ")
-   if instances=="quit":
-    print("goodbye")
-    break
+    instance = config["instance"]
+    hours = config["hours"]
+    servers = config["servers"]
 
-   hours = int(input("Hours: "))
-   servers= int(input("Servers: "))
-   hourly_prices=prices[instances]
-   Total_cost=hourly_prices*hours*servers
-   daily_estimate=Total_cost/30
-   
-   print(f"Average daily estimate: {daily_estimate:.2f}")
-   print(f"monthly estimate: {Total_cost:.2f}")
-   #print(f"{cost:.2f}")
-   break
-   
-    
-   
-   
-    
-  except ValueError:
-   print("pleae type the hours")
-  except KeyError:
-   print("Unknown instance type")
+    hourly_price = prices[instance]
+
+    total_cost = calculate_total_cost(
+        hourly_price,
+        hours,
+        servers
+    )
+
+    daily_estimate = calculate_daily_estimate(total_cost)
+
+    print(f"Instance: {instance}")
+    print(f"Hours: {hours}")
+    print(f"Servers: {servers}")
+    print(f"Monthly estimate: ${total_cost:.2f}")
+    print(f"Average daily estimate: ${daily_estimate:.2f}")
 
 
 main()
-
-  
-  
-
-
-
-
-
