@@ -2,19 +2,19 @@ import sys
 import json
 
 from cost_tools import calculate_total_cost, calculate_daily_estimate
+from aws_pricing import get_price_from_api
 
 
-prices = {
-    "t2.micro": 0.0116,
-    "t3.micro": 0.0104,
-    "t3.small": 0.0208
-}
+def save_report(report):
+    with open("cost_report.txt", "w") as file:
+        file.write(report)
 
 
 def main():
 
+
     #Command-line arguments
-   
+
     if len(sys.argv) == 4:
 
         instance = sys.argv[1]
@@ -27,9 +27,9 @@ def main():
             sys.exit()
 
         try:
-            hourly_price = prices[instance]
-        except KeyError:
-            print("Unknown instance type.")
+            hourly_price = get_price_from_api(instance)
+        except Exception:
+            print("Could not get pricing information.")
             sys.exit()
 
         total_cost = calculate_total_cost(
@@ -40,19 +40,25 @@ def main():
 
         daily_estimate = calculate_daily_estimate(total_cost)
 
-        print("\nAWS COST ESTIMATE")
-        print("-----------------")
-        print(f"Instance: {instance}")
-        print(f"Hourly price: ${hourly_price:.4f}")
-        print(f"Hours: {hours}")
-        print(f"Servers: {servers}")
-        print(f"Monthly estimate: ${total_cost:.2f}")
-        print(f"Average daily estimate: ${daily_estimate:.2f}")
+        report = f"""
+AWS COST ESTIMATE
+
+Instance: {instance}
+Hourly price: ${hourly_price:.4f}
+Hours: {hours}
+Servers: {servers}
+
+Monthly estimate: ${total_cost:.2f}
+Average daily estimate: ${daily_estimate:.2f}
+"""
+
+        print(report)
+        save_report(report)
 
 
-    
+
     #JSON configuration
-    
+ 
     elif len(sys.argv) == 1:
 
         try:
@@ -64,8 +70,10 @@ def main():
 
         total_infrastructure_cost = 0
 
-        print("\nAWS INFRASTRUCTURE COST ESTIMATE")
-        print("--------------------------------")
+        report = """
+AWS INFRASTRUCTURE COST ESTIMATE
+
+"""
 
         for server in config["servers"]:
 
@@ -74,9 +82,9 @@ def main():
             count = server["count"]
 
             try:
-                hourly_price = prices[instance]
-            except KeyError:
-                print(f"Unknown instance type: {instance}")
+                hourly_price = get_price_from_api(instance)
+            except Exception:
+                print(f"Could not get pricing for {instance}.")
                 continue
 
             cost = calculate_total_cost(
@@ -87,23 +95,31 @@ def main():
 
             total_infrastructure_cost += cost
 
-            print(f"\nInstance: {instance}")
-            print(f"Hourly price: ${hourly_price:.4f}")
-            print(f"Hours: {hours}")
-            print(f"Servers: {count}")
-            print(f"Cost: ${cost:.2f}")
+            report += f"""
+Instance: {instance}
+Hourly price: ${hourly_price:.4f}
+Hours: {hours}
+Servers: {count}
+Cost: ${cost:.2f}
+"""
 
         daily_estimate = calculate_daily_estimate(
             total_infrastructure_cost
         )
 
-        print("\n-------------------------------")
-        print(f"Total monthly cost: ${total_infrastructure_cost:.2f}")
-        print(f"Average daily cost: ${daily_estimate:.2f}")
+        report += f"""
+
+Total monthly cost: ${total_infrastructure_cost:.2f}
+Average daily cost: ${daily_estimate:.2f}
+"""
+
+        print(report)
+        save_report(report)
 
 
-    
 
+    # Invalid command
+  
     else:
 
         print(

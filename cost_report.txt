@@ -1,0 +1,10 @@
+
+AWS COST ESTIMATE
+
+Instance: t3.micro
+Hourly price: $0.0104
+Hours: 730
+Servers: 3
+
+Monthly estimate: $22.78
+Average daily estimate: $0.76
