@@ -1,5 +1,14 @@
 {
-    "instance": "t3.micro",
-    "hours": 730,
-    "servers": 3
+    "servers": [
+        {
+            "instance": "t3.micro",
+            "hours": 730,
+            "count": 3
+        },
+        {
+            "instance": "t3.small",
+            "hours": 500,
+            "count": 2
+        }
+    ]
 }
